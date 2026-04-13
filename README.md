@@ -1,11 +1,48 @@
-<div align="center">
+# HypnoZen 🧘‍♂️
 
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+Application d'auto-hypnose personnalisée fonctionnant de manière 100% autonome.
 
-  <h1>Built with AI Studio</h2>
+## 🚀 Déploiement sur GitHub
+### ⚠️ Résolution de l'erreur de permission GitHub
+L'erreur "Insufficient permissions to push workflow files" signifie que vous devez autoriser AI Studio à gérer vos fichiers de déploiement (Workflows).
 
-  <p>The fastest path from prompt to production with Gemini.</p>
+**Pour corriger cela :**
+1. Allez dans vos **Paramètres GitHub** (photo de profil en haut à droite).
+2. Allez dans **Applications** > **Authorized GitHub Apps**.
+3. Trouvez **AI Studio Build** et cliquez sur **Configure**.
+4. Dans la section **Permissions**, vérifiez que **Workflows** est autorisé en lecture/écriture.
+5. **Solution de contournement** : J'ai temporairement supprimé le fichier de déploiement automatique pour vous permettre de sauvegarder votre code sur GitHub. Une fois les permissions réglées, je pourrai le remettre.
 
-  <a href="https://aistudio.google.com/apps">Start building</a>
+### Étapes d'installation
+1. **Créez un nouveau dépôt** sur GitHub.
+2. **Exportez le code** depuis AI Studio (Menu Paramètres > Export to GitHub).
+3. **Activez GitHub Pages** :
+   - Dans votre dépôt GitHub, allez dans **Settings > Pages**.
+   - Sous "Build and deployment > Source", choisissez **GitHub Actions**.
+   - L'application sera déployée automatiquement.
 
-</div>
+## 🛠 Installation locale
+
+1. Clonez le dépôt :
+   ```bash
+   git clone <votre-url-repo>
+   cd hypnozen
+   ```
+2. Installez les dépendances :
+   ```bash
+   npm install
+   ```
+3. Lancez le serveur de développement :
+   ```bash
+   npm run dev
+   ```
+
+## ✨ Caractéristiques
+
+- **20 scripts d'hypnose pré-enregistrés** avec insertion dynamique du prénom.
+- **Synthèse vocale native** (Web Speech API) : fonctionne sans service externe.
+- **Ambiance sonore générée** : Bruit rose apaisant généré via Web Audio API.
+- **Zéro dépendance externe** : Idéal pour un hébergement statique gratuit.
+
+## 📜 Licence
+Apache-2.0

@@ -1,0 +1,5 @@
+{
+  "name": "HypnoZen",
+  "description": "Application d'auto-hypnose personnalisée générant des séances audio basées sur vos besoins.",
+  "requestFramePermissions": []
+}
