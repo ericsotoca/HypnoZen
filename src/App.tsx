@@ -50,24 +50,93 @@ export default function App() {
   const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0);
 
   const synth = window.speechSynthesis;
-  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const audioContextRef = useRef<AudioContext | null>(null);
+  const noiseNodeRef = useRef<AudioNode | null>(null);
+  const gainNodeRef = useRef<GainNode | null>(null);
+  const lfoNodeRef = useRef<OscillatorNode | null>(null);
   const segmentsRef = useRef<string[]>([]);
   const isPausedRef = useRef(false);
 
-  // Single stable music track for all themes
-  const STABLE_MUSIC_URL = "https://assets.mixkit.co/music/preview/mixkit-meditation-spirit-627.mp3";
+  // Initialize and Control Web Audio Generator
+  const initZenAudio = () => {
+    if (audioContextRef.current) return;
+    
+    try {
+      const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+      const ctx = new AudioContextClass();
+      audioContextRef.current = ctx;
+
+      // Create Brownian Noise (Softer than white/pink)
+      const bufferSize = 2 * ctx.sampleRate;
+      const noiseBuffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+      const output = noiseBuffer.getChannelData(0);
+      let lastOut = 0.0;
+      for (let i = 0; i < bufferSize; i++) {
+        const white = Math.random() * 2 - 1;
+        output[i] = (lastOut + (0.02 * white)) / 1.02;
+        lastOut = output[i];
+        output[i] *= 3.5; // volume adjustment
+      }
+
+      const noiseSource = ctx.createBufferSource();
+      noiseSource.buffer = noiseBuffer;
+      noiseSource.loop = true;
+
+      // Filter for deep sound
+      const filter = ctx.createBiquadFilter();
+      filter.type = 'lowpass';
+      filter.frequency.value = 400;
+
+      // Gain node for volume control
+      const gainNode = ctx.createGain();
+      gainNode.gain.value = 0; // Start at 0
+      gainNodeRef.current = gainNode;
+
+      // LFO for "breathing" effect
+      const lfo = ctx.createOscillator();
+      lfo.type = 'sine';
+      lfo.frequency.value = 0.15; // slow breathing
+      const lfoGain = ctx.createGain();
+      lfoGain.gain.value = 0.05; // depth of breathing
+      
+      lfo.connect(lfoGain);
+      lfoGain.connect(gainNode.gain);
+
+      noiseSource.connect(filter);
+      filter.connect(gainNode);
+      gainNode.connect(ctx.destination);
+
+      noiseSource.start();
+      lfo.start();
+      noiseNodeRef.current = noiseSource;
+      lfoNodeRef.current = lfo;
+    } catch (err) {
+      console.error("Web Audio Init failed:", err);
+      setAudioError("Audio non supporté");
+    }
+  };
+
+  const startZenAudio = () => {
+    if (!audioContextRef.current) initZenAudio();
+    if (audioContextRef.current?.state === 'suspended') {
+      audioContextRef.current.resume();
+    }
+    if (gainNodeRef.current && musicEnabled && !isMuted) {
+      gainNodeRef.current.gain.setTargetAtTime(musicVolume, audioContextRef.current!.currentTime, 1.5);
+    }
+  };
+
+  const stopZenAudio = () => {
+    if (gainNodeRef.current) {
+      gainNodeRef.current.gain.setTargetAtTime(0, audioContextRef.current!.currentTime, 0.5);
+    }
+  };
 
   const handleGenerate = async () => {
     if (!name || !selectedIssue) return;
     
-    // Start music IMMEDIATELY on user gesture to bypass autoplay policy
-    if (audioRef.current && musicEnabled && !isMuted) {
-      audioRef.current.volume = musicVolume;
-      const playPromise = audioRef.current.play();
-      if (playPromise !== undefined) {
-        playPromise.catch(err => console.error("Initial audio play failed:", err instanceof Error ? err.message : "Unknown error"));
-      }
-    }
+    // Start Zen Audio IMMEDIATELY
+    startZenAudio();
 
     setIsGenerating(true);
     await new Promise(resolve => setTimeout(resolve, 1500));
@@ -84,19 +153,13 @@ export default function App() {
   };
 
   const toggleMusicTest = () => {
-    if (audioRef.current) {
-      if (audioRef.current.paused) {
-        setIsAudioLoading(true);
-        setAudioError(null);
-        audioRef.current.volume = musicVolume;
-        audioRef.current.play().catch(err => {
-          console.error("Test play failed:", err instanceof Error ? err.message : "Unknown error");
-          setAudioError("Erreur de lecture");
-          setIsAudioLoading(false);
-        });
-      } else {
-        audioRef.current.pause();
-      }
+    if (!audioContextRef.current || gainNodeRef.current?.gain.value === 0) {
+      setIsAudioLoading(true);
+      setAudioError(null);
+      startZenAudio();
+      setTimeout(() => setIsAudioLoading(false), 500);
+    } else {
+      stopZenAudio();
     }
   };
 
@@ -116,10 +179,7 @@ export default function App() {
     
     utterance.onstart = () => {
       setIsPlaying(true);
-      // Double check music is playing
-      if (audioRef.current && musicEnabled && !isMuted && audioRef.current.paused) {
-        audioRef.current.play().catch(() => {});
-      }
+      if (musicEnabled && !isMuted) startZenAudio();
     };
 
     utterance.onend = () => {
@@ -142,15 +202,12 @@ export default function App() {
   const togglePlay = () => {
     if (isPlaying) {
       synth.cancel();
-      if (audioRef.current) audioRef.current.pause();
+      stopZenAudio();
       setIsPlaying(false);
       isPausedRef.current = true;
     } else {
       isPausedRef.current = false;
-      if (audioRef.current && musicEnabled && !isMuted) {
-        audioRef.current.volume = musicVolume;
-        audioRef.current.play().catch(() => {});
-      }
+      if (musicEnabled && !isMuted) startZenAudio();
       startPlayback(currentSegmentIndex);
     }
   };
@@ -158,17 +215,14 @@ export default function App() {
   const toggleMute = () => {
     const newMuted = !isMuted;
     setIsMuted(newMuted);
-    if (audioRef.current) {
-      audioRef.current.muted = newMuted;
+    if (gainNodeRef.current) {
+      gainNodeRef.current.gain.setTargetAtTime(newMuted ? 0 : musicVolume, audioContextRef.current!.currentTime, 0.2);
     }
   };
 
   const reset = () => {
     synth.cancel();
-    if (audioRef.current) {
-      audioRef.current.pause();
-      audioRef.current.currentTime = 0;
-    }
+    stopZenAudio();
     setIsPlaying(false);
     isPausedRef.current = false;
     setCurrentStep('setup');
@@ -178,51 +232,24 @@ export default function App() {
   };
 
   useEffect(() => {
-    if (audioRef.current) {
-      setIsAudioLoading(true);
-      setAudioError(null);
-      audioRef.current.load();
+    if (gainNodeRef.current && audioContextRef.current) {
+      const targetGain = (isMuted || !musicEnabled) ? 0 : musicVolume;
+      gainNodeRef.current.gain.setTargetAtTime(targetGain, audioContextRef.current.currentTime, 0.2);
     }
-  }, []);
-
-  useEffect(() => {
-    if (audioRef.current) {
-      audioRef.current.volume = isMuted ? 0 : musicVolume;
-    }
-  }, [musicVolume, isMuted]);
+  }, [musicVolume, isMuted, musicEnabled]);
 
   useEffect(() => {
     return () => {
       synth.cancel();
-      if (audioRef.current) audioRef.current.pause();
+      audioContextRef.current?.close();
     };
   }, []);
 
-  const musicUrl = `${STABLE_MUSIC_URL}?v=${audioKey}`;
-
   return (
     <div className="min-h-screen bg-[#0a0502] text-white font-sans selection:bg-orange-500/30 overflow-hidden relative">
-      <audio 
-        key={audioKey}
-        ref={audioRef} 
-        src={musicUrl} 
-        loop 
-        preload="auto"
-        onCanPlay={() => {
-          setIsAudioLoading(false);
-          setAudioError(null);
-          if (shouldPlayAfterLoad && audioRef.current) {
-            audioRef.current.play().catch(() => {});
-            setShouldPlayAfterLoad(false);
-          }
-        }}
-        onError={() => {
-          console.error("Audio error: Failed to load stable music track");
-          setAudioError("Impossible de charger le son");
-          setIsAudioLoading(false);
-          setShouldPlayAfterLoad(false);
-        }}
-      />
+      <div className="hidden">
+        {/* Placeholder to keep layout if needed, though we use Web Audio now */}
+      </div>
       
       {/* Atmospheric Background */}
       <div className="fixed inset-0 pointer-events-none">
