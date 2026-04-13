@@ -11,7 +11,7 @@ L'erreur "Insufficient permissions to push workflow files" signifie que vous dev
 2. Allez dans **Applications** > **Authorized GitHub Apps**.
 3. Trouvez **AI Studio Build** et cliquez sur **Configure**.
 4. Dans la section **Permissions**, vérifiez que **Workflows** est autorisé en lecture/écriture.
-5. **Solution de contournement** : J'ai temporairement supprimé le fichier de déploiement automatique pour vous permettre de sauvegarder votre code sur GitHub. Une fois les permissions réglées, je pourrai le remettre.
+5. Le fichier de déploiement automatique a été restauré pour permettre la publication sur GitHub Pages.
 
 ### Étapes d'installation
 1. **Créez un nouveau dépôt** sur GitHub.
