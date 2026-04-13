@@ -44,8 +44,7 @@ export default function App() {
   const [progress, setProgress] = useState(0);
   const [isAudioLoading, setIsAudioLoading] = useState(false);
   const [audioError, setAudioError] = useState<string | null>(null);
-  const [audioKey, setAudioKey] = useState(0);
-  const [shouldPlayAfterLoad, setShouldPlayAfterLoad] = useState(false);
+  const [isTestingAudio, setIsTestingAudio] = useState(false);
   const [currentStep, setCurrentStep] = useState<'setup' | 'playing'>('setup');
   const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0);
 
@@ -154,11 +153,11 @@ export default function App() {
 
   const toggleMusicTest = () => {
     if (!audioContextRef.current || gainNodeRef.current?.gain.value === 0) {
-      setIsAudioLoading(true);
+      setIsTestingAudio(true);
       setAudioError(null);
       startZenAudio();
-      setTimeout(() => setIsAudioLoading(false), 500);
     } else {
+      setIsTestingAudio(false);
       stopZenAudio();
     }
   };
@@ -342,22 +341,19 @@ export default function App() {
                     onClick={(e) => {
                       e.stopPropagation();
                       if (audioError) {
-                        setAudioKey(prev => prev + 1);
                         setAudioError(null);
-                        setIsAudioLoading(true);
-                        setShouldPlayAfterLoad(true);
+                        startZenAudio();
                       } else {
                         toggleMusicTest();
                       }
                     }}
-                    disabled={isAudioLoading}
                     className={`px-3 py-1.5 rounded-lg border text-[10px] uppercase tracking-wider transition-all ${
                       audioError 
                         ? 'bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20' 
                         : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
                     }`}
                   >
-                    {isAudioLoading ? 'Chargement...' : audioError ? 'Réessayer' : (audioRef.current?.paused === false ? 'Arrêter le test' : 'Tester le son')}
+                    {audioError ? 'Réessayer' : (isTestingAudio ? 'Arrêter le test' : 'Tester le son')}
                   </button>
                   <button
                     onClick={() => setMusicEnabled(!musicEnabled)}
