@@ -6,7 +6,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Sparkles, Play, Pause, RotateCcw, Volume2, VolumeX, CheckCircle2, Leaf, Wind, Moon, Music } from 'lucide-react';
-import { SCRIPTS, MUSIC_URLS } from './constants/scripts';
+import { SCRIPTS } from './constants/scripts';
 
 const ISSUES = [
   "Confiance en soi",
@@ -44,6 +44,8 @@ export default function App() {
   const [progress, setProgress] = useState(0);
   const [isAudioLoading, setIsAudioLoading] = useState(false);
   const [audioError, setAudioError] = useState<string | null>(null);
+  const [audioKey, setAudioKey] = useState(0);
+  const [shouldPlayAfterLoad, setShouldPlayAfterLoad] = useState(false);
   const [currentStep, setCurrentStep] = useState<'setup' | 'playing'>('setup');
   const [currentSegmentIndex, setCurrentSegmentIndex] = useState(0);
 
@@ -51,6 +53,9 @@ export default function App() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const segmentsRef = useRef<string[]>([]);
   const isPausedRef = useRef(false);
+
+  // Single stable music track for all themes
+  const STABLE_MUSIC_URL = "https://assets.mixkit.co/music/preview/mixkit-meditation-spirit-627.mp3";
 
   const handleGenerate = async () => {
     if (!name || !selectedIssue) return;
@@ -60,7 +65,7 @@ export default function App() {
       audioRef.current.volume = musicVolume;
       const playPromise = audioRef.current.play();
       if (playPromise !== undefined) {
-        playPromise.catch(err => console.error("Initial audio play failed:", err));
+        playPromise.catch(err => console.error("Initial audio play failed:", err instanceof Error ? err.message : "Unknown error"));
       }
     }
 
@@ -85,7 +90,7 @@ export default function App() {
         setAudioError(null);
         audioRef.current.volume = musicVolume;
         audioRef.current.play().catch(err => {
-          console.error("Test play failed:", err);
+          console.error("Test play failed:", err instanceof Error ? err.message : "Unknown error");
           setAudioError("Erreur de lecture");
           setIsAudioLoading(false);
         });
@@ -177,9 +182,8 @@ export default function App() {
       setIsAudioLoading(true);
       setAudioError(null);
       audioRef.current.load();
-      audioRef.current.volume = isMuted ? 0 : musicVolume;
     }
-  }, [selectedIssue]);
+  }, []);
 
   useEffect(() => {
     if (audioRef.current) {
@@ -194,18 +198,29 @@ export default function App() {
     };
   }, []);
 
-  const musicUrl = MUSIC_URLS[selectedIssue] || "https://cdn.pixabay.com/download/audio/2022/08/02/audio_88444c68d0.mp3";
+  const musicUrl = `${STABLE_MUSIC_URL}?v=${audioKey}`;
 
   return (
     <div className="min-h-screen bg-[#0a0502] text-white font-sans selection:bg-orange-500/30 overflow-hidden relative">
       <audio 
+        key={audioKey}
         ref={audioRef} 
         src={musicUrl} 
         loop 
-        onCanPlay={() => setIsAudioLoading(false)}
+        preload="auto"
+        onCanPlay={() => {
+          setIsAudioLoading(false);
+          setAudioError(null);
+          if (shouldPlayAfterLoad && audioRef.current) {
+            audioRef.current.play().catch(() => {});
+            setShouldPlayAfterLoad(false);
+          }
+        }}
         onError={() => {
+          console.error("Audio error: Failed to load stable music track");
           setAudioError("Impossible de charger le son");
           setIsAudioLoading(false);
+          setShouldPlayAfterLoad(false);
         }}
       />
       
@@ -297,15 +312,25 @@ export default function App() {
                 </div>
                 <div className="flex items-center gap-3">
                   <button
-                    onClick={toggleMusicTest}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      if (audioError) {
+                        setAudioKey(prev => prev + 1);
+                        setAudioError(null);
+                        setIsAudioLoading(true);
+                        setShouldPlayAfterLoad(true);
+                      } else {
+                        toggleMusicTest();
+                      }
+                    }}
                     disabled={isAudioLoading}
                     className={`px-3 py-1.5 rounded-lg border text-[10px] uppercase tracking-wider transition-all ${
                       audioError 
-                        ? 'bg-red-500/10 border-red-500/30 text-red-400' 
+                        ? 'bg-red-500/10 border-red-500/30 text-red-400 hover:bg-red-500/20' 
                         : 'bg-white/5 border-white/10 text-white/60 hover:bg-white/10'
                     }`}
                   >
-                    {isAudioLoading ? 'Chargement...' : audioError || (audioRef.current?.paused === false ? 'Arrêter le test' : 'Tester le son')}
+                    {isAudioLoading ? 'Chargement...' : audioError ? 'Réessayer' : (audioRef.current?.paused === false ? 'Arrêter le test' : 'Tester le son')}
                   </button>
                   <button
                     onClick={() => setMusicEnabled(!musicEnabled)}

@@ -317,26 +317,3 @@ export const SCRIPTS: Record<string, string> = {
   
   Revenez maintenant. Un... sentez votre présence. Deux... inspirez l'audace. Trois... ouvrez les yeux, prêt à briller.`
 };
-
-export const MUSIC_URLS: Record<string, string> = {
-  "Confiance en soi": "https://cdn.pixabay.com/download/audio/2022/08/02/audio_88444c68d0.mp3",
-  "Prise de parole en public": "https://cdn.pixabay.com/download/audio/2022/03/24/audio_b1c8a167d4.mp3",
-  "Gestion du stress": "https://cdn.pixabay.com/download/audio/2021/11/25/audio_91b325ef8c.mp3",
-  "Sommeil réparateur": "https://cdn.pixabay.com/download/audio/2022/01/21/audio_317427a577.mp3",
-  "Arrêt du tabac": "https://cdn.pixabay.com/download/audio/2022/05/27/audio_180873748b.mp3",
-  "Peur des serpents": "https://cdn.pixabay.com/download/audio/2022/08/02/audio_88444c68d0.mp3",
-  "Perte de poids": "https://cdn.pixabay.com/download/audio/2022/03/24/audio_b1c8a167d4.mp3",
-  "Peur de l'avion": "https://cdn.pixabay.com/download/audio/2021/11/25/audio_91b325ef8c.mp3",
-  "Concentration et mémoire": "https://cdn.pixabay.com/download/audio/2022/01/21/audio_317427a577.mp3",
-  "Motivation au travail": "https://cdn.pixabay.com/download/audio/2022/05/27/audio_180873748b.mp3",
-  "Lâcher-prise": "https://cdn.pixabay.com/download/audio/2022/08/02/audio_88444c68d0.mp3",
-  "Gestion de la douleur": "https://cdn.pixabay.com/download/audio/2022/03/24/audio_b1c8a167d4.mp3",
-  "Surmonter une rupture": "https://cdn.pixabay.com/download/audio/2021/11/25/audio_91b325ef8c.mp3",
-  "Créativité débloquée": "https://cdn.pixabay.com/download/audio/2022/01/21/audio_317427a577.mp3",
-  "Phobie sociale": "https://cdn.pixabay.com/download/audio/2022/05/27/audio_180873748b.mp3",
-  "Estime de soi": "https://cdn.pixabay.com/download/audio/2022/08/02/audio_88444c68d0.mp3",
-  "Préparation aux examens": "https://cdn.pixabay.com/download/audio/2022/03/24/audio_b1c8a167d4.mp3",
-  "Sport et performance": "https://cdn.pixabay.com/download/audio/2021/11/25/audio_91b325ef8c.mp3",
-  "Colère et impulsivité": "https://cdn.pixabay.com/download/audio/2022/01/21/audio_317427a577.mp3",
-  "Timidité excessive": "https://cdn.pixabay.com/download/audio/2022/05/27/audio_180873748b.mp3"
-};
