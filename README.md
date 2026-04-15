@@ -1,48 +1,64 @@
 # HypnoZen 🧘‍♂️
 
-Application d'auto-hypnose personnalisée fonctionnant de manière 100% autonome.
+> **Live :** [ericsotoca.github.io/HypnoZen](https://ericsotoca.github.io/HypnoZen/)
 
-## 🚀 Déploiement sur GitHub
-### ⚠️ Résolution de l'erreur de permission GitHub
-L'erreur "Insufficient permissions to push workflow files" signifie que vous devez autoriser AI Studio à gérer vos fichiers de déploiement (Workflows).
+Application d'**auto-hypnose personnalisée** fonctionnant 100% hors-ligne via le navigateur. Zéro dépendance externe, zéro serveur.
 
-**Pour corriger cela :**
-1. Allez dans vos **Paramètres GitHub** (photo de profil en haut à droite).
-2. Allez dans **Applications** > **Authorized GitHub Apps**.
-3. Trouvez **AI Studio Build** et cliquez sur **Configure**.
-4. Dans la section **Permissions**, vérifiez que **Workflows** est autorisé en lecture/écriture.
-5. Le fichier de déploiement automatique a été restauré pour permettre la publication sur GitHub Pages.
+---
 
-### Étapes d'installation
-1. **Créez un nouveau dépôt** sur GitHub.
-2. **Exportez le code** depuis AI Studio (Menu Paramètres > Export to GitHub).
-3. **Activez GitHub Pages** :
-   - Dans votre dépôt GitHub, allez dans **Settings > Pages**.
-   - Sous "Build and deployment > Source", choisissez **GitHub Actions**.
-   - L'application sera déployée automatiquement.
+## ✨ Fonctionnalités
 
-## 🛠 Installation locale
+| Feature | Détail |
+|---|---|
+| 🎙️ **Synthèse vocale** | Web Speech API — fonctionne sans service tiers |
+| 🎵 **3 ambiances sonores** | Zen, Océan, Forêt — générées via Web Audio API |
+| 👤 **Personnalisation** | Insertion dynamique du prénom dans les scripts |
+| 📜 **20 scripts d'hypnose** | Relaxation, confiance, sommeil, concentration, etc. |
+| 📱 **PWA** | Installable sur mobile, fonctionne hors-ligne |
+| 🔇 **Zéro dépendance** | Idéal pour hébergement statique gratuit |
 
-1. Clonez le dépôt :
-   ```bash
-   git clone <votre-url-repo>
-   cd hypnozen
-   ```
-2. Installez les dépendances :
-   ```bash
-   npm install
-   ```
-3. Lancez le serveur de développement :
-   ```bash
-   npm run dev
-   ```
+## 🛠️ Stack
 
-## ✨ Caractéristiques
+- **TypeScript** + **Vite** (build optimisé)
+- **Web Audio API** — sons procéduraux (pas de fichiers audio)
+- **Web Speech API** — synthèse vocale native
+- **GitHub Actions** — déploiement automatique sur GitHub Pages
 
-- **20 scripts d'hypnose pré-enregistrés** avec insertion dynamique du prénom.
-- **Synthèse vocale native** (Web Speech API) : fonctionne sans service externe.
-- **Ambiance sonore générée** : Bruit rose apaisant généré via Web Audio API.
-- **Zéro dépendance externe** : Idéal pour un hébergement statique gratuit.
+## 🚀 Installation locale
+
+```bash
+# 1. Cloner le repo
+git clone https://github.com/ericsotoca/HypnoZen.git
+cd HypnoZen
+
+# 2. Installer les dépendances
+npm install
+
+# 3. Lancer en développement
+npm run dev
+
+# 4. Build de production
+npm run build
+```
+
+## 📁 Structure
+
+```
+src/
+├── App.tsx           # Composant principal
+├── main.tsx          # Point d'entrée
+├── index.css         # Styles globaux
+└── constants/        # Scripts d'hypnose et configurations
+```
+
+## ⚙️ Variables d'environnement
+
+Copier `.env.example` → `.env` et renseigner les valeurs si besoin.
 
 ## 📜 Licence
-Apache-2.0
+
+Apache-2.0 — Libre d'utilisation et de modification.
+
+---
+
+*Développé par Éric Sotoca · 2025-2026*
